@@ -6,84 +6,92 @@ const requestLimits = {
 
 const requestCounts = new Map();
 
-// Monitor network requests
-browser.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    const url = new URL(details.url);
-    
-    // Check for potential DDoS
-    const clientIP = details.ip;
-    if (!requestCounts.has(clientIP)) {
-      requestCounts.set(clientIP, {
-        count: 1,
-        timestamp: Date.now()
-      });
+// Monitor network requests using declarativeNetRequest
+browser.declarativeNetRequest.onRuleMatchedDebug.addListener(
+  function(info) {
+    const timestamp = Math.floor(Date.now() / requestLimits.windowMs);
+    if (!requestCounts.has(timestamp)) {
+      requestCounts.set(timestamp, 1);
     } else {
-      const clientData = requestCounts.get(clientIP);
-      if (Date.now() - clientData.timestamp > requestLimits.windowMs) {
-        clientData.count = 1;
-        clientData.timestamp = Date.now();
-      } else {
-        clientData.count++;
-        if (clientData.count > requestLimits.maxRequests) {
-          browser.notifications.create({
-            type: 'basic',
-            iconUrl: 'icons/icon48.png',
-            title: 'Security Alert',
-            message: 'Potential DDoS attack detected. Request rate exceeded.'
-          });
-          return { cancel: true };
-        }
+      const count = requestCounts.get(timestamp);
+      requestCounts.set(timestamp, count + 1);
+      
+      if (count > requestLimits.maxRequests) {
+        browser.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon48.png',
+          title: 'Security Alert',
+          message: 'High request rate detected.'
+        });
+      }
+    }
+
+    // Clean up old timestamps
+    const currentTimestamp = Math.floor(Date.now() / requestLimits.windowMs);
+    for (const [key] of requestCounts) {
+      if (key < currentTimestamp - 1) {
+        requestCounts.delete(key);
       }
     }
 
     // Check for suspicious patterns in the request
-    if (details.method === 'POST') {
+    if (info.request.method === 'POST' && info.request.body) {
       try {
-        const decoder = new TextDecoder('utf-8');
-        const rawData = details.requestBody.raw[0].bytes;
-        const data = decoder.decode(rawData);
-        
-        // Check for potential jailbreak attempts
-        const jailbreakPatterns = [
-          /ignore previous instructions/i,
-          /you are now free/i,
-          /pretend you are/i,
-          /bypass/i
-        ];
-        
-        if (jailbreakPatterns.some(pattern => pattern.test(data))) {
-          browser.notifications.create({
-            type: 'basic',
-            iconUrl: 'icons/icon48.png',
-            title: 'Security Alert',
-            message: 'Potential jailbreak attempt detected!'
-          });
-          return { cancel: true };
-        }
+        if (info.request.body.raw && info.request.body.raw[0] && info.request.body.raw[0].bytes) {
+          const decoder = new TextDecoder('utf-8');
+          const rawData = info.request.body.raw[0].bytes;
+          const data = decoder.decode(rawData);
+          
+          // Check for potential jailbreak attempts
+          const jailbreakPatterns = [
+            /ignore previous instructions/i,
+            /you are now free/i,
+            /pretend you are/i,
+            /bypass/i
+          ];
+          
+          if (jailbreakPatterns.some(pattern => pattern.test(data))) {
+            browser.notifications.create({
+              type: 'basic',
+              iconUrl: 'icons/icon48.png',
+              title: 'Security Alert',
+              message: 'Potential jailbreak attempt detected!'
+            });
+          }
 
-        // Check for data poisoning attempts
-        const dataPoisonPatterns = [
-          /<script>/i,
-          /javascript:/i,
-          /eval\(/i,
-          /document\./i
-        ];
+          // Check for data poisoning attempts
+          const dataPoisonPatterns = [
+            /<script>/i,
+            /javascript:/i,
+            /eval\(/i,
+            /document\./i
+          ];
 
-        if (dataPoisonPatterns.some(pattern => pattern.test(data))) {
-          browser.notifications.create({
-            type: 'basic',
-            iconUrl: 'icons/icon48.png',
-            title: 'Security Alert',
-            message: 'Potential data poisoning attempt detected!'
-          });
-          return { cancel: true };
+          if (dataPoisonPatterns.some(pattern => pattern.test(data))) {
+            browser.notifications.create({
+              type: 'basic',
+              iconUrl: 'icons/icon48.png',
+              title: 'Security Alert',
+              message: 'Potential data poisoning attempt detected!'
+            });
+          }
         }
       } catch (error) {
         console.error('Error processing request:', error);
       }
     }
-  },
-  { urls: ["*://*.openai.com/*"] },
-  ["blocking", "requestBody"]
-); 
+  }
+);
+
+// Listen for messages from content script
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'promptLeak') {
+    browser.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'Security Alert',
+      message: 'Potential prompt leak detected!'
+    });
+  }
+  return true;
+}); 

@@ -1,17 +1,20 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "SentinelAI",
   "version": "1.0",
   "description": "Advanced AI Data Guardian - Intelligent data distillation, cleansing, and security for GenAI interactions",
   "permissions": [
-    "webRequest",
-    "webRequestBlocking",
+    "declarativeNetRequest",
+    "declarativeNetRequestFeedback",
     "storage",
-    "notifications",
+    "notifications"
+  ],
+  "host_permissions": [
     "*://*.openai.com/*"
   ],
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["background.js"],
+    "type": "module"
   },
   "content_scripts": [
     {
@@ -19,7 +22,7 @@
       "js": ["content.js"]
     }
   ],
-  "browser_action": {
+  "action": {
     "default_popup": "popup.html",
     "default_icon": {
       "48": "icons/icon48.png",
@@ -29,5 +32,14 @@
   "icons": {
     "48": "icons/icon48.png",
     "96": "icons/icon96.png"
+  },
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset_1",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
   }
 } 
