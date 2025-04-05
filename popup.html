@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body {
+      width: 320px;
+      padding: 20px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    }
+    .status {
+      margin: 15px 0;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .status:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .active {
+      background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+      border: 1px solid #2196F3;
+    }
+    .warning {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+      border: 1px solid #ff9800;
+    }
+    h2 {
+      color: #1565C0;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+    .feature {
+      margin: 8px 0;
+      padding: 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.7);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo {
+      width: 32px;
+      height: 32px;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    .feature-icon {
+      font-size: 18px;
+    }
+    .status-title {
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: #1976D2;
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <h2>
+    <img src="icons/icon48.png" class="logo" alt="SentinelAI Logo">
+    SentinelAI
+  </h2>
+  <div class="status active">
+    <div class="status-title">Active Protections</div>
+    <div class="feature">
+      <span class="feature-icon">🛡️</span>
+      <span>Advanced Bot Detection</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🔒</span>
+      <span>Jailbreak Prevention</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🧪</span>
+      <span>Data Cleansing</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">⚡</span>
+      <span>DDoS Shield</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">🔍</span>
+      <span>Prompt Leak Detection</span>
+    </div>
+  </div>
+  <div class="status warning">
+    <div class="status-title">Active Monitoring</div>
+    <div class="feature">
+      <span class="feature-icon">📄</span>
+      <span>Document Upload Protection</span>
+    </div>
+    <div class="feature">
+      <span class="feature-icon">💬</span>
+      <span>Language Analysis</span>
+    </div>
+  </div>
+</body>
+</html> 
