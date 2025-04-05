@@ -1,97 +1,139 @@
-// Request rate limiting
-const requestLimits = {
-  windowMs: 60000, // 1 minute
-  maxRequests: 100
-};
+// SentinelAI Background Script
+console.log('SentinelAI: Background script loaded');
 
-const requestCounts = new Map();
+// Global variables
+let isInitialized = false;
 
-// Monitor network requests using declarativeNetRequest
-browser.declarativeNetRequest.onRuleMatchedDebug.addListener(
-  function(info) {
-    const timestamp = Math.floor(Date.now() / requestLimits.windowMs);
-    if (!requestCounts.has(timestamp)) {
-      requestCounts.set(timestamp, 1);
-    } else {
-      const count = requestCounts.get(timestamp);
-      requestCounts.set(timestamp, count + 1);
-      
-      if (count > requestLimits.maxRequests) {
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: 'icons/icon48.png',
-          title: 'Security Alert',
-          message: 'High request rate detected.'
-        });
-      }
-    }
-
-    // Clean up old timestamps
-    const currentTimestamp = Math.floor(Date.now() / requestLimits.windowMs);
-    for (const [key] of requestCounts) {
-      if (key < currentTimestamp - 1) {
-        requestCounts.delete(key);
-      }
-    }
-
-    // Check for suspicious patterns in the request
-    if (info.request.method === 'POST' && info.request.body) {
-      try {
-        if (info.request.body.raw && info.request.body.raw[0] && info.request.body.raw[0].bytes) {
-          const decoder = new TextDecoder('utf-8');
-          const rawData = info.request.body.raw[0].bytes;
-          const data = decoder.decode(rawData);
-          
-          // Check for potential jailbreak attempts
-          const jailbreakPatterns = [
-            /ignore previous instructions/i,
-            /you are now free/i,
-            /pretend you are/i,
-            /bypass/i
-          ];
-          
-          if (jailbreakPatterns.some(pattern => pattern.test(data))) {
-            browser.notifications.create({
-              type: 'basic',
-              iconUrl: 'icons/icon48.png',
-              title: 'Security Alert',
-              message: 'Potential jailbreak attempt detected!'
-            });
-          }
-
-          // Check for data poisoning attempts
-          const dataPoisonPatterns = [
-            /<script>/i,
-            /javascript:/i,
-            /eval\(/i,
-            /document\./i
-          ];
-
-          if (dataPoisonPatterns.some(pattern => pattern.test(data))) {
-            browser.notifications.create({
-              type: 'basic',
-              iconUrl: 'icons/icon48.png',
-              title: 'Security Alert',
-              message: 'Potential data poisoning attempt detected!'
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Error processing request:', error);
-      }
-    }
+// Initialize the extension
+function initialize() {
+  try {
+    if (isInitialized) return;
+    
+    // Set up message handling
+    browser.runtime.onMessage.addListener(handleMessage);
+    
+    // Set up declarative net request rules
+    setupDeclarativeNetRequest();
+    
+    isInitialized = true;
+    console.log('SentinelAI: Background script initialized');
+  } catch (error) {
+    console.error('SentinelAI: Error initializing background script:', error);
   }
-);
+}
 
-// Listen for messages from content script
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'promptLeak') {
+// Handle messages from content script
+function handleMessage(message, sender, sendResponse) {
+  try {
+    if (!message || !message.type) {
+      console.error('SentinelAI: Invalid message received');
+      return;
+    }
+    
+    switch (message.type) {
+      case 'promptLeak':
+        handlePromptLeak(message, sender);
+        break;
+      case 'threatDetected':
+        handleThreatDetected(message, sender);
+        break;
+      default:
+        console.log('SentinelAI: Unknown message type:', message.type);
+    }
+    
+    // Always send a response to prevent the port from closing
+    sendResponse({ received: true });
+  } catch (error) {
+    console.error('SentinelAI: Error handling message:', error);
+    sendResponse({ error: error.message });
+  }
+  
+  // Return true to indicate we'll send a response asynchronously
+  return true;
+}
+
+// Handle prompt leak detection
+function handlePromptLeak(message, sender) {
+  try {
+    if (!message.content || !message.threats) {
+      console.error('SentinelAI: Invalid prompt leak message');
+      return;
+    }
+    
+    // Log the incident
+    console.log('SentinelAI: Prompt leak detected', {
+      url: sender.tab ? sender.tab.url : 'unknown',
+      threats: message.threats,
+      riskLevel: message.risk_level
+    });
+    
+    // Show notification
     browser.notifications.create({
       type: 'basic',
       iconUrl: 'icons/icon48.png',
-      title: 'Security Alert',
-      message: 'Potential prompt leak detected!'
+      title: 'SentinelAI Security Alert',
+      message: `Potential prompt leaking detected with ${message.threats.length} threats. Risk level: ${message.risk_level}`
     });
+  } catch (error) {
+    console.error('SentinelAI: Error handling prompt leak:', error);
   }
-  return true;
-}); 
+}
+
+// Handle threat detection
+function handleThreatDetected(message, sender) {
+  try {
+    if (!message.threats) {
+      console.error('SentinelAI: Invalid threat detection message');
+      return;
+    }
+    
+    // Log the incident
+    console.log('SentinelAI: Threat detected', {
+      url: sender.tab ? sender.tab.url : 'unknown',
+      threats: message.threats,
+      riskLevel: message.risk_level
+    });
+    
+    // Show notification
+    browser.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'SentinelAI Security Alert',
+      message: `${message.threats.length} potential threats detected. Risk level: ${message.risk_level}`
+    });
+  } catch (error) {
+    console.error('SentinelAI: Error handling threat detection:', error);
+  }
+}
+
+// Set up declarative net request rules
+function setupDeclarativeNetRequest() {
+  try {
+    // Update rules when extension is installed or updated
+    browser.runtime.onInstalled.addListener(() => {
+      try {
+        // Get the rules from storage or use defaults
+        browser.storage.local.get('declarativeNetRequestRules').then(rules => {
+          if (rules && rules.declarativeNetRequestRules) {
+            // Update the rules
+            browser.declarativeNetRequest.updateDynamicRules({
+              removeRuleIds: rules.declarativeNetRequestRules.map(rule => rule.id),
+              addRules: rules.declarativeNetRequestRules
+            }).catch(error => {
+              console.error('SentinelAI: Error updating dynamic rules:', error);
+            });
+          }
+        }).catch(error => {
+          console.error('SentinelAI: Error getting rules from storage:', error);
+        });
+      } catch (error) {
+        console.error('SentinelAI: Error in onInstalled listener:', error);
+      }
+    });
+  } catch (error) {
+    console.error('SentinelAI: Error setting up declarative net request:', error);
+  }
+}
+
+// Initialize when the extension is loaded
+initialize(); 

@@ -1,18 +1,38 @@
-{
-  "id": 1,
-  "priority": 1,
-  "action": {
-    "type": "modifyHeaders",
-    "responseHeaders": [
-      {
-        "header": "X-SentinelAI-Monitored",
-        "operation": "set",
-        "value": "true"
-      }
-    ]
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "X-SentinelAI-Monitored",
+          "operation": "set",
+          "value": "true"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://chat.openai.com/*",
+      "resourceTypes": ["xmlhttprequest", "main_frame"]
+    }
   },
-  "condition": {
-    "urlFilter": "*://*.openai.com/*",
-    "resourceTypes": ["xmlhttprequest", "main_frame"]
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "responseHeaders": [
+        {
+          "header": "X-SentinelAI-Monitored",
+          "operation": "set",
+          "value": "true"
+        }
+      ]
+    },
+    "condition": {
+      "urlFilter": "*://chatgpt.com/*",
+      "resourceTypes": ["xmlhttprequest", "main_frame"]
+    }
   }
-} 
+] 

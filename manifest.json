@@ -7,10 +7,12 @@
     "declarativeNetRequest",
     "declarativeNetRequestFeedback",
     "storage",
-    "notifications"
+    "notifications",
+    "tabs"
   ],
   "host_permissions": [
-    "*://*.openai.com/*"
+    "*://*.openai.com/*",
+    "*://chatgpt.com/*"
   ],
   "background": {
     "scripts": ["background.js"],
@@ -18,7 +20,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.openai.com/*"],
+      "matches": ["*://*.openai.com/*", "*://chatgpt.com/*"],
       "js": ["content.js"]
     }
   ],
@@ -33,6 +35,12 @@
     "48": "icons/icon48.png",
     "96": "icons/icon96.png"
   },
+  "web_accessible_resources": [
+    {
+      "resources": ["backend/sentinelai.log"],
+      "matches": ["*://*.openai.com/*", "*://chatgpt.com/*"]
+    }
+  ],
   "declarative_net_request": {
     "rule_resources": [
       {

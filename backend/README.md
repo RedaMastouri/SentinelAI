@@ -1,91 +1,102 @@
-# SentinelAI Backend
+# SentinelAI Backend Server
 
-This is the Python backend service for the SentinelAI browser extension. It provides advanced security analysis using YARA rules and pattern matching.
+This is a simple Python-based backend server for the SentinelAI browser extension that handles logging of security warnings and detections.
 
 ## Features
 
-- **FastAPI Backend**: Modern, fast web framework with automatic API documentation
-- **Swagger UI**: Interactive API documentation at `/docs`
-- **ReDoc**: Alternative API documentation at `/redoc`
-- **YARA Rules Integration**: Uses YARA rules for malware detection
-- **Pattern Matching**: Detects suspicious patterns in text and files
-- **Risk Assessment**: Provides risk levels and detailed threat information
-- **Logging**: Comprehensive logging for debugging and monitoring
-- **REST API**: Simple REST API for text and file analysis
+- Logs security warnings and detections to a file
+- Provides API endpoints for logging and retrieving logs
+- Supports batch logging for offline scenarios
+- Simple and lightweight
 
-## Installation
+## Setup
 
-1. Create a virtual environment:
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+### Windows
+
+1. Make sure you have Python installed (Python 3.6 or higher recommended)
+2. Navigate to the backend directory:
+   ```
+   cd backend
+   ```
+3. Start the server using the batch file:
+   ```
+   run_server.bat
+   ```
+   This will start the server in the background and create a log file at `backend/sentinelai.log`.
+
+4. To stop the server, run:
+   ```
+   stop_server.bat
+   ```
+
+### Manual Start
+
+If the batch files don't work, you can start the server manually:
+
+```
+python server.py
 ```
 
-2. Install dependencies:
-```bash
-pip install -r requirements.txt
+The server will start on port 5000 and create a log file at `backend/sentinelai.log`.
+
+## API Endpoints
+
+### POST /api/log
+
+Log a single entry to the log file.
+
+Request body:
+```json
+{
+  "logText": "[2023-06-15T12:34:56.789Z] HIGH: Potential security threat detected | URL: https://example.com | Detected Text: suspicious text",
+  "filePath": "backend/sentinelai.log"
+}
 ```
 
-3. Install YARA:
-- On Windows: Download and install from https://github.com/VirusTotal/yara/releases
-- On Linux: `sudo apt-get install yara`
-- On macOS: `brew install yara`
-
-## Usage
-
-1. Start the server:
-```bash
-python security_analyzer.py
+Response:
+```json
+{
+  "success": true,
+  "message": "Log entry added successfully"
+}
 ```
 
-2. The server will run on `http://localhost:5000` with the following endpoints:
-- POST `/analyze/text`: Analyze text content
-- POST `/analyze/file`: Analyze file content
-- GET `/health`: Health check endpoint
+### POST /api/log-batch
 
-3. Access the API documentation:
-- Swagger UI: `http://localhost:5000/docs`
-- ReDoc: `http://localhost:5000/redoc`
+Log multiple entries to the log file (useful for syncing offline logs).
 
-## API Documentation
+Request body:
+```json
+{
+  "logs": "[2023-06-15T12:34:56.789Z] HIGH: Potential security threat detected | URL: https://example.com | Detected Text: suspicious text\n[2023-06-15T12:35:00.123Z] MEDIUM: Another warning | URL: https://example.com | Detected Text: another text",
+  "filePath": "backend/sentinelai.log"
+}
+```
 
-The API is fully documented using OpenAPI (formerly Swagger) specification. You can:
+Response:
+```json
+{
+  "success": true,
+  "message": "Log entries added successfully"
+}
+```
 
-1. View interactive documentation at `/docs`
-2. Test API endpoints directly from the Swagger UI
-3. View detailed parameter descriptions and response schemas
-4. Download the OpenAPI specification
+### GET /api/log
 
-## YARA Rules
+Retrieve the contents of the log file.
 
-The backend uses YARA rules for malware detection. Rules are stored in `rules/malware_rules.yar` and include:
-- Suspicious JavaScript detection
-- Shell command detection
-- File operation monitoring
-- Sensitive data exposure detection
-- Jailbreak attempt detection
+Response:
+```json
+{
+  "success": true,
+  "logs": "[2023-06-15T12:34:56.789Z] HIGH: Potential security threat detected | URL: https://example.com | Detected Text: suspicious text\n[2023-06-15T12:35:00.123Z] MEDIUM: Another warning | URL: https://example.com | Detected Text: another text"
+}
+```
 
-## Logging
+## Troubleshooting
 
-Logs are stored in `sentinelai.log` and include:
-- Analysis results
-- Error messages
-- System events
-
-## Security Considerations
-
-- The backend runs locally to ensure data privacy
-- All analysis is performed in memory
-- No data is stored permanently
-- CORS is enabled for local development (restrict in production)
-
-## Development
-
-To add new YARA rules:
-1. Edit `rules/malware_rules.yar`
-2. Add new patterns to `SecurityAnalyzer` class
-3. Restart the server
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
+- If the server fails to start, make sure Python is installed and in your PATH
+- If logs are not being written, check file permissions in the backend directory
+- For CORS issues, ensure the extension is making requests to the correct URL
+- If you're running the server in the background and want to stop it, use the `stop_server.bat` script
+- If you see a KeyboardInterrupt error, it means you manually stopped the server with Ctrl+C, which is normal 
