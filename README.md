@@ -1,4 +1,4 @@
-# SentinelAI - AI Data Guardian
+# <img src="icons/icon48.png" alt="SentinelAI Logo" width="48" height="48" style="vertical-align: middle"> SentinelAI - AI Data Guardian
 
 Advanced AI Data Guardian - Intelligent data distillation, cleansing, and security for GenAI interactions.
 
