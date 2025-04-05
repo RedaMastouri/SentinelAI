@@ -1,13 +1,32 @@
 # SentinelAI
 
 <div align="center">
-  <img src="icons/icon96.png" alt="SentinelAI Logo" width="120" height="120">
-  <h3>Advanced AI Data Guardian</h3>
-  <p>Intelligent data distillation, cleansing, and security for GenAI interactions</p>
-  
-  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-  [![Firefox Add-on](https://img.shields.io/badge/Firefox-Add--on-orange.svg)](https://addons.mozilla.org/)
-  [![GitHub stars](https://img.shields.io/github/stars/RedaMastouri/SentinelAI.svg?style=social)](https://github.com/RedaMastouri/SentinelAI/stargazers)
+
+<svg width="120" height="120" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="shieldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <path d="M48 8L88 24V40C88 65.2 71.2 87.2 48 92C24.8 87.2 8 65.2 8 40V24L48 8Z" 
+        fill="url(#shieldGradient)" stroke="#1565C0" stroke-width="2"/>
+  <path d="M32 36L44 48L64 28" 
+        stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="36" r="4" fill="white"/>
+  <circle cx="44" cy="48" r="4" fill="white"/>
+  <circle cx="64" cy="28" r="4" fill="white"/>
+  <path d="M48 24V32M48 52V60" 
+        stroke="white" stroke-width="2" stroke-dasharray="3 3" stroke-opacity="0.7"/>
+</svg>
+
+<h3>Advanced AI Data Guardian</h3>
+<p>Intelligent data distillation, cleansing, and security for GenAI interactions</p>
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Firefox Add-on](https://img.shields.io/badge/Firefox-Add--on-orange.svg)](https://addons.mozilla.org/)
+[![GitHub stars](https://img.shields.io/github/stars/RedaMastouri/SentinelAI.svg?style=social)](https://github.com/RedaMastouri/SentinelAI/stargazers)
+
 </div>
 
 ## Overview
@@ -53,10 +72,6 @@ SentinelAI/
 ├── background.js        # Background processes and security monitoring
 ├── content.js           # Content script for page interaction
 ├── popup.html           # Extension popup interface
-├── icons/               # Extension icons
-│   ├── icon48.png       # 48x48 icon
-│   ├── icon96.png       # 96x96 icon
-│   └── icon.svg         # Source SVG icon
 └── README.md            # Documentation
 ```
 
